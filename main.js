@@ -17,13 +17,16 @@ $(document).ready(function () {
     //Siri configuration
     
     var siriWave = new SiriWave({
-    container: document.getElementById("siri-container"),
-    width: 640,
-    height: 200,
-    style: "ios9",
-    amplitude: 1,
-    speed: 0.30,
-    autostart: true
+        container: document.getElementById("siri-container"),
+        width: 800, // Increased width for better display
+        height: 180,
+        style: "ios9",
+        amplitude: 1,
+        speed: 0.30,
+        frequency: 4, // Added for better wave effect
+        color: "#4895f0", // Custom color that matches your theme
+        cover: true,
+        autostart: true
     });
 
     // Siri message animation
@@ -59,19 +62,26 @@ $(document).ready(function () {
     // helper to set siri text immediately (tries textillate-aware update, falls back)
     function setSiriMessage(text) {
         try {
-            // if textillate produced the .texts list, update first li
-            var $li = $(".siri-message .texts li:first");
-            if ($li.length) {
-                $li.text(text);
-            } else {
-                // fallback: set plain text on the element
-                $(".siri-message").text(text);
+            const formattedText = text.replace(/\s+/g, ' ')
+                                     .replace(/\.\s/g, '.<br><br>')
+                                     .replace(/\?\s/g, '?<br><br>')
+                                     .replace(/\!\s/g, '!<br><br>');
+            
+            $(".siri-message").html(formattedText);
+            
+            // Restart textillate
+            try { 
+                $('.siri-message').textillate('start'); 
+            } catch (e) { 
+                console.log("Textillate error:", e);
             }
-            // restart textillate animation (safe)
-            try { $('.siri-message').textillate('start'); } catch (e) { /* ignore */ }
+            
+            // Scroll to show latest message
+            $('.message-scroll-container').scrollTop($('.message-scroll-container')[0].scrollHeight);
+            
         } catch (e) {
             console.warn("setSiriMessage error:", e);
-            try { $(".siri-message").text(text); } catch (_) {}
+            $(".siri-message").text(text);
         }
     }
 
